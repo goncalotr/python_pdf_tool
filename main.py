@@ -1,71 +1,59 @@
 
-# --- Libraries ---
+# --- Imports ---
+
+# Libraries
 import os
 from pypdf import PdfWriter, PdfReader
 
-# --- Functions ---
+# Other source files
+from src.display import display_menu
+from src.testing import *
+from src.pdf_edit import *
 
-def concatenate_pdfs(pdf_list, output_filename="concatenated_output.pdf"):
-	"""
-	Concatenates a list of PDF files into a single PDF.
+def main():
+    while True:
+        display_menu()
+        choice = input("Enter your choice: ")
 
-	Args:
-		pdf_list (list): A list of paths to PDF files to concatenate.
-		output_filename (str): The name of the output PDF file.
-	"""
+        if choice == '1':
+            directory = input("Enter the path to the directory containing PDF files: ").strip()
 
-	merger = PdfWriter()
+            if not directory:
+                print("No directory entered. Returning to menu.")
+                continue
 
-	for pdf_path in pdf_list:
-		if not os.path.exists(pdf_path):
-			print(f"Warning: File not found and will be skipped: {pdf_path}")
-			continue
-		try:
-			reader = PdfReader(pdf_path)
-			for page in reader.pages:
-				merger.add_page(page)
-			print(f"Added: {pdf_path}")
-		except Exception as e:
-			print(f"Error processing {pdf_path}: {e}")
-			
+            output_file_name = "concatenated_directory_output.pdf" 
+            concatenate_pdfs_in_directory(directory, output_file_name)
 
-	if len(merger.pages) > 0:
-		try:
-			with open(output_filename, "wb") as f_out:
-				merger.write(f_out)
-			print(f"Successfully concatenated PDFs into: {output_filename}")
-		except Exception as e:
-			print(f"Error writing output file {output_filename}: {e}")
-	else:
-		print("No pages were added. Output file not created.")
+        elif choice == '2':
+            try:
+                num_dummy_files = int(input("How many dummy PDF files to create? (e.g., 3): "))
+                pages_in_each = int(input("How many pages in each dummy PDF? (e.g., 2): "))
+                dummy_output_dir = input("Enter directory to save dummies (default: 'test_dummies' in current dir): ") or "test_dummies"
 
-	merger.close()
+                if num_dummy_files <= 0 or pages_in_each <= 0:
+                    print("Number of files and pages must be positive integers.")
+                    continue
 
-# --- Main ---
+                create_multiple_dummy_pdfs(
+                    base_name="sample_doc",
+                    num_files=num_dummy_files,
+                    pages_per_file=pages_in_each,
+                    output_dir=dummy_output_dir
+                )
+
+            except ValueError:
+                print("Invalid input. Please enter numbers.")
+            except Exception as e:
+                print(f"An error occurred: {e}")
+
+        elif choice == '3':
+            print("Exiting PDF tool. Goodbye!")
+            break
+
+        else:
+            print("Invalid choice. Please enter a number between 1 and 3.")
 
 if __name__ == "__main__":
-
-	try:
-		writer1 = PdfWriter()
-		writer1.add_blank_page(width=200, height=200)
-		with open("dummy1.pdf", "wb") as f: writer1.write(f)
-		writer1.close()
-
-		writer2 = PdfWriter()
-		writer2.add_blank_page(width=300, height=300) # Different size for demo
-		with open("dummy2.pdf", "wb") as f: writer2.write(f)
-		writer2.close()
-
-		print("Dummy PDFs created for demonstration.")
-
-	except Exception as e:
-		print(f"Could not create dummy PDFs (pypdf might need to be installed): {e}")
-		print("Please ensure you have pypdf installed: pip install pypdf")
-		print("And provide your own PDF files for testing.")
-
-	pdfs_to_join = ["dummy1.pdf", "non_existent_file.pdf", "dummy2.pdf"]
-	output_pdf_name = "my_merged_document.pdf"
-	concatenate_pdfs(pdfs_to_join, output_pdf_name)
-
-	if os.path.exists("dummy1.pdf"): os.remove("dummy1.pdf")
-	if os.path.exists("dummy2.pdf"): os.remove("dummy2.pdf")
+    print("Welcome to the Simple PDF Tool!")
+    main()
