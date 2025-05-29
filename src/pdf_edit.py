@@ -31,6 +31,7 @@ def concatenate_pdfs_in_directory(directory_path, output_filename="merged_output
     merger = PdfWriter()
     print("\nConcatenating the following PDF files in order:")
     files_to_merge_count = 0
+
     for pdf_path in pdf_files:
         if os.path.basename(pdf_path) == output_filename:
             print(f"Skipping potential output file: {os.path.basename(pdf_path)}")
